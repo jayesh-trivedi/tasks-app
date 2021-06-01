@@ -6,30 +6,18 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.jayesh.tasks.utils.TaskDbHelper;
 
-public class UserModel {
+public class User {
     private int id;
     private String userName;
     private TaskDbHelper dbHelper;
 
-    public UserModel(TaskDbHelper dbHelper) {
-        this.dbHelper = dbHelper;
-    }
-
-    public UserModel(String userName, TaskDbHelper dbHelper) {
+    public User(String userName, TaskDbHelper dbHelper) {
         this.userName = userName;
         this.dbHelper = dbHelper;
     }
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public void setUsername(String userName) {
-        this.userName = userName;
-    }
-
-    public void setDbHelper(TaskDbHelper dbHelper) {
-        this.dbHelper = dbHelper;
     }
 
     public int getId() {
@@ -40,14 +28,13 @@ public class UserModel {
         return this.userName;
     }
 
-    public void loginUser(String userName) {
+    public void loginUser() {
         SQLiteDatabase readableDb = dbHelper.getReadableDatabase();
         Cursor cursor = readableDb.query(TaskDbHelper.TBL_USER, null, TaskDbHelper.USER_USERNAME + " =?",
-                new String[]{userName}, null, null, null);
+                new String[]{getUserName()}, null, null, null);
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();
             setId(Integer.parseInt(cursor.getString(cursor.getColumnIndex(TaskDbHelper.USER_ID))));
-            setUsername(cursor.getString(cursor.getColumnIndex(TaskDbHelper.USER_USERNAME)));
         } else {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
             ContentValues values = new ContentValues();

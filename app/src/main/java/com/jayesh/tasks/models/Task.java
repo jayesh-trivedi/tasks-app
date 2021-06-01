@@ -8,19 +8,21 @@ import com.jayesh.tasks.utils.TaskDbHelper;
 
 import java.util.ArrayList;
 
-public class TaskModel {
+public class Task {
     private int id;
     private String task;
     private int userId;
     private TaskDbHelper dbHelper;
 
-    public TaskModel(TaskDbHelper dbHelper) {
+    public Task(int userId, TaskDbHelper dbHelper) {
+        this.userId = userId;
         this.dbHelper = dbHelper;
     }
 
-    public TaskModel(String task, int userId) {
+    public Task(String task, int userId, TaskDbHelper dbHelper) {
         this.task = task;
         this.userId = userId;
+        this.dbHelper = dbHelper;
     }
 
     public void setId(int id) {
@@ -35,10 +37,6 @@ public class TaskModel {
         this.userId = userId;
     }
 
-    public void setDbHelper(TaskDbHelper dbHelper) {
-        this.dbHelper = dbHelper;
-    }
-
     public int getId() {
         return id;
     }
@@ -51,11 +49,11 @@ public class TaskModel {
         return userId;
     }
 
-    public ArrayList<String> getTasks(int userId) {
+    public ArrayList<String> getTasks() {
         ArrayList<String> taskList = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = db.query(TaskDbHelper.TBL_TASK, new String[]{TaskDbHelper.TASKS_TITLE},
-                TaskDbHelper.TASKS_USER_ID_FK + " =?", new String[]{String.valueOf(userId)}, null,
+                TaskDbHelper.TASKS_USER_ID_FK + " =?", new String[]{String.valueOf(getUserId())}, null,
                 null, null);
         while (cursor.moveToNext()) {
             int idx = cursor.getColumnIndex(TaskDbHelper.TASKS_TITLE);
@@ -65,10 +63,10 @@ public class TaskModel {
         return taskList;
     }
 
-    public void addTask(String title, int userId) {
+    public void addTask() {
         SQLiteDatabase readableDb = dbHelper.getReadableDatabase();
         Cursor cursor = readableDb.query(TaskDbHelper.TBL_TASK, null, TaskDbHelper.TASKS_TITLE + " =? AND " +
-                        TaskDbHelper.TASKS_USER_ID_FK + " =?", new String[]{title, String.valueOf(userId)}, null,
+                        TaskDbHelper.TASKS_USER_ID_FK + " =?", new String[]{getTask(), String.valueOf(getUserId())}, null,
                 null, null);
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();
@@ -78,8 +76,8 @@ public class TaskModel {
         } else {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
             ContentValues values = new ContentValues();
-            values.put(TaskDbHelper.TASKS_TITLE, title);
-            values.put(TaskDbHelper.TASKS_USER_ID_FK, userId);
+            values.put(TaskDbHelper.TASKS_TITLE, getTask());
+            values.put(TaskDbHelper.TASKS_USER_ID_FK, getUserId());
             db.insert(TaskDbHelper.TBL_TASK,
                     null,
                     values);
@@ -88,10 +86,10 @@ public class TaskModel {
         readableDb.close();
     }
 
-    public void deleteTask(String title, int userId) {
+    public void deleteTask() {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.delete(TaskDbHelper.TBL_TASK, TaskDbHelper.TASKS_TITLE + " =? AND " + TaskDbHelper.TASKS_USER_ID_FK +
-                " =?", new String[]{title, String.valueOf(userId)});
+                " =?", new String[]{getTask(), String.valueOf(getUserId())});
         db.close();
     }
 }

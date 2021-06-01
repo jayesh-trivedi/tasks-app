@@ -13,13 +13,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.jayesh.tasks.adapters.TaskAdapter;
-import com.jayesh.tasks.models.TaskModel;
-import com.jayesh.tasks.models.UserModel;
+import com.jayesh.tasks.models.Task;
+import com.jayesh.tasks.models.User;
 import com.jayesh.tasks.utils.TaskDbHelper;
 
 public class MainActivity extends AppCompatActivity {
-    private UserModel user;
-    private TaskModel task;
+    private User user;
     private TaskDbHelper dbHelper;
     private RecyclerView recyclerViewTaskList;
     private MenuItem loggedInUser;
@@ -29,8 +28,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         dbHelper = new TaskDbHelper(this);
-        user = new UserModel(dbHelper);
-        task = new TaskModel(dbHelper);
         recyclerViewTaskList = findViewById(R.id.recyclerView_task_list);
         LinearLayoutManager layoutManager=new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -47,21 +44,18 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_logout:
-                AlertDialog dialog = new AlertDialog.Builder(this)
-                        .setTitle("Logout?")
-                        .setPositiveButton("Logout", (dialog12, which) -> {
-                            login();
-                        })
-                        .setNegativeButton("Cancel", null)
-                        .create();
-                dialog.show();
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.action_logout) {
+            AlertDialog dialog = new AlertDialog.Builder(this)
+                    .setTitle("Logout?")
+                    .setPositiveButton("Logout", (dialog12, which) -> {
+                        login();
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .create();
+            dialog.show();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     private void login(){
@@ -71,7 +65,8 @@ public class MainActivity extends AppCompatActivity {
                 .setView(loginEditText)
                 .setPositiveButton("Login", (dialog1, which) -> {
                     String userName = String.valueOf(loginEditText.getText());
-                    user.loginUser(userName);
+                    user = new User(userName, dbHelper);
+                    user.loginUser();
                     loggedInUser.setTitle(user.getUserName());
                     showTasks();
                 })
@@ -81,7 +76,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showTasks(){
-        TaskAdapter adapter = new TaskAdapter(task.getTasks(user.getId()));
+        Task task = new Task(user.getId(), dbHelper);
+        TaskAdapter adapter = new TaskAdapter(task.getTasks());
         recyclerViewTaskList.setAdapter(adapter);
         adapter.notifyDataSetChanged();
     }
@@ -93,7 +89,8 @@ public class MainActivity extends AppCompatActivity {
                 .setView(todoEditText)
                 .setPositiveButton("Add", (dialog1, which) -> {
                     String newTask = String.valueOf(todoEditText.getText());
-                    task.addTask(newTask, user.getId());
+                    Task task = new Task(newTask, user.getId(), dbHelper);
+                    task.addTask();
                     showTasks();
                 })
                 .setNegativeButton("Cancel", null)
@@ -105,7 +102,8 @@ public class MainActivity extends AppCompatActivity {
         View parent = (View) view.getParent();
         TextView taskTextView = parent.findViewById(R.id.textView_task_title);
         String selectedTask = String.valueOf(taskTextView.getText());
-        task.deleteTask(selectedTask, user.getId());
+        Task task = new Task(selectedTask,user.getId(), dbHelper);
+        task.deleteTask();
         showTasks();
     }
 }
