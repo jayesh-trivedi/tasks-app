@@ -20,12 +20,6 @@ public class UserModel {
         this.dbHelper = dbHelper;
     }
 
-    public UserModel(int id, String userName, TaskDbHelper dbHelper) {
-        this.id = id;
-        this.userName = userName;
-        this.dbHelper = dbHelper;
-    }
-
     public void setId(int id) {
         this.id = id;
     }
@@ -34,7 +28,7 @@ public class UserModel {
         this.userName = userName;
     }
 
-    public void setDbHelper(TaskDbHelper dbHelper){
+    public void setDbHelper(TaskDbHelper dbHelper) {
         this.dbHelper = dbHelper;
     }
 
@@ -48,19 +42,20 @@ public class UserModel {
 
     public void loginUser(String userName) {
         SQLiteDatabase readableDb = dbHelper.getReadableDatabase();
-        Cursor cursor = readableDb.query(dbHelper.TBL_USER, null, dbHelper.USER_USERNAME + " =?", new String[] {userName},null,null,null);
-        if(cursor.getCount() > 0){
+        Cursor cursor = readableDb.query(TaskDbHelper.TBL_USER, null, TaskDbHelper.USER_USERNAME + " =?",
+                new String[]{userName}, null, null, null);
+        if (cursor.getCount() > 0) {
             cursor.moveToFirst();
-            setId(Integer.parseInt(cursor.getString(cursor.getColumnIndex(dbHelper.USER_ID))));
-            setUsername(cursor.getString(cursor.getColumnIndex(dbHelper.USER_USERNAME)));
-        }
-        else {
+            setId(Integer.parseInt(cursor.getString(cursor.getColumnIndex(TaskDbHelper.USER_ID))));
+            setUsername(cursor.getString(cursor.getColumnIndex(TaskDbHelper.USER_USERNAME)));
+        } else {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
             ContentValues values = new ContentValues();
-            values.put(dbHelper.USER_USERNAME, userName);
-            db.insert(dbHelper.TBL_USER,
+            values.put(TaskDbHelper.USER_USERNAME, userName);
+            long id = db.insert(TaskDbHelper.TBL_USER,
                     null,
                     values);
+            setId((int) id);
             db.close();
         }
         readableDb.close();
