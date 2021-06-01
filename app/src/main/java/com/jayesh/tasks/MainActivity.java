@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         dbHelper = new TaskDbHelper(this);
         recyclerViewTaskList = findViewById(R.id.recyclerView_task_list);
-        LinearLayoutManager layoutManager=new LinearLayoutManager(this);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerViewTaskList.setLayoutManager(layoutManager);
         login();
@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
             AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle("Logout?")
                     .setPositiveButton("Logout", (dialog12, which) -> {
-                        login();
+                        logout();
                     })
                     .setNegativeButton("Cancel", null)
                     .create();
@@ -58,13 +58,16 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void login(){
+    private void login() {
         final EditText loginEditText = new EditText(this);
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Enter User Name")
                 .setView(loginEditText)
                 .setPositiveButton("Login", (dialog1, which) -> {
                     String userName = String.valueOf(loginEditText.getText());
+                    if(userName.equals("")){
+                        login();
+                    }
                     user = new User(userName, dbHelper);
                     user.loginUser();
                     loggedInUser.setTitle(user.getUserName());
@@ -75,14 +78,21 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void showTasks(){
+    private void logout() {
+        loggedInUser.setTitle("");
+        user.logoutUser();
+        showTasks();
+        login();
+    }
+
+    private void showTasks() {
         Task task = new Task(user.getId(), dbHelper);
         TaskAdapter adapter = new TaskAdapter(task.getTasks());
         recyclerViewTaskList.setAdapter(adapter);
         adapter.notifyDataSetChanged();
     }
 
-    public void addNewTask(View view){
+    public void addNewTask(View view) {
         final EditText todoEditText = new EditText(this);
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Add Task")
@@ -98,11 +108,11 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    public void deleteTask(View view){
+    public void deleteTask(View view) {
         View parent = (View) view.getParent();
         TextView taskTextView = parent.findViewById(R.id.textView_task_title);
         String selectedTask = String.valueOf(taskTextView.getText());
-        Task task = new Task(selectedTask,user.getId(), dbHelper);
+        Task task = new Task(selectedTask, user.getId(), dbHelper);
         task.deleteTask();
         showTasks();
     }

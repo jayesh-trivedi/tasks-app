@@ -51,15 +51,17 @@ public class Task {
 
     public ArrayList<String> getTasks() {
         ArrayList<String> taskList = new ArrayList<>();
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TaskDbHelper.TBL_TASK, new String[]{TaskDbHelper.TASKS_TITLE},
-                TaskDbHelper.TASKS_USER_ID_FK + " =?", new String[]{String.valueOf(getUserId())}, null,
-                null, null);
-        while (cursor.moveToNext()) {
-            int idx = cursor.getColumnIndex(TaskDbHelper.TASKS_TITLE);
-            taskList.add(cursor.getString(idx));
+        if(getUserId() != 0) {
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
+            Cursor cursor = db.query(TaskDbHelper.TBL_TASK, new String[]{TaskDbHelper.TASKS_TITLE},
+                    TaskDbHelper.TASKS_USER_ID_FK + " =?", new String[]{String.valueOf(getUserId())}, null,
+                    null, null);
+            while (cursor.moveToNext()) {
+                int idx = cursor.getColumnIndex(TaskDbHelper.TASKS_TITLE);
+                taskList.add(cursor.getString(idx));
+            }
+            db.close();
         }
-        db.close();
         return taskList;
     }
 

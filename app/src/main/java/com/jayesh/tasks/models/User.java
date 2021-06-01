@@ -47,4 +47,9 @@ public class User {
         }
         readableDb.close();
     }
+
+    public void logoutUser() {
+        this.id = 0;
+        this.userName = "";
+    }
 }
